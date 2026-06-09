@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>Miura_Labeling 功能需求文档</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Microsoft YaHei", "SimSun", Arial, sans-serif;
+    font-size: 12pt;
+    color: #222;
+    line-height: 1.7;
+    padding: 40px 50px;
+    max-width: 860px;
+    margin: 0 auto;
+  }
+  h1 {
+    font-size: 20pt;
+    color: #1565C0;
+    border-bottom: 2.5px solid #1976D2;
+    padding-bottom: 8px;
+    margin-bottom: 6px;
+  }
+  .meta {
+    font-size: 10pt;
+    color: #666;
+    margin-bottom: 28px;
+  }
+  .meta span { margin-right: 24px; }
+  h2 {
+    font-size: 14pt;
+    color: #1976D2;
+    margin: 28px 0 10px 0;
+    border-left: 4px solid #1976D2;
+    padding-left: 10px;
+  }
+  h3 {
+    font-size: 12pt;
+    color: #333;
+    margin: 18px 0 8px 0;
+    background: #E3F2FD;
+    padding: 4px 10px;
+    border-radius: 3px;
+  }
+  p { margin: 8px 0; }
+  ul { margin: 6px 0 6px 20px; }
+  li { margin: 3px 0; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0 16px 0;
+    font-size: 11pt;
+  }
+  th {
+    background: #1976D2;
+    color: white;
+    padding: 7px 10px;
+    text-align: left;
+    font-weight: 600;
+  }
+  td {
+    padding: 6px 10px;
+    border: 1px solid #BBDEFB;
+  }
+  tr:nth-child(even) td { background: #F5F9FF; }
+  code {
+    background: #F0F4FF;
+    border: 1px solid #C5CAE9;
+    border-radius: 3px;
+    padding: 1px 5px;
+    font-family: "Consolas", "Courier New", monospace;
+    font-size: 10.5pt;
+    color: #B71C1C;
+  }
+  .badge {
+    display: inline-block;
+    background: #1976D2;
+    color: white;
+    font-size: 9pt;
+    padding: 1px 7px;
+    border-radius: 10px;
+    margin-right: 6px;
+    font-weight: 600;
+  }
+  .note {
+    background: #FFF8E1;
+    border-left: 4px solid #FFA000;
+    padding: 8px 12px;
+    margin: 10px 0;
+    font-size: 11pt;
+    border-radius: 2px;
+  }
+  .section-divider {
+    border: none;
+    border-top: 1px solid #E0E0E0;
+    margin: 20px 0;
+  }
+  @media print {
+    body { padding: 20px 30px; }
+    h2 { page-break-before: auto; }
+    table { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Miura_Labeling — 标签打印软件功能需求文档</h1>
+<div class="meta">
+  <span><strong>版本：</strong>v1.0</span>
+  <span><strong>日期：</strong>2026-06-02</span>
+  <span><strong>平台：</strong>Windows WPF (.NET Framework 4.7.2)</span>
+  <span><strong>目标硬件：</strong>TSC TTP-244 系列打印机（USB）</span>
+</div>
+
+<!-- ======= 1 产品概述 ======= -->
+<h2>1. 产品概述</h2>
+<p>
+  Miura_Labeling 是一款专为 <strong>TSC TTP-244 系列</strong>热转印标签打印机设计的 Windows 桌面应用，
+  支持在 <strong>30 mm × 100 mm</strong> 标签上可视化编排并打印
+  文本、Code 128 条形码与 QR 二维码，通过 TSC 官方驱动库 <code>TSCLIB.dll</code> 与打印机通信。
+</p>
+
+<hr class="section-divider">
+
+<!-- ======= 2 功能需求 ======= -->
+<h2>2. 功能需求</h2>
+
+<!-- FR-01 -->
+<h3><span class="badge">FR-01</span>标签信息录入</h3>
+<table>
+  <tr><th>字段</th><th>控件类型</th><th>默认值</th><th>说明</th></tr>
+  <tr><td>日期</td><td>日期选择器</td><td>当天</td><td>格式 yyyy-MM-dd</td></tr>
+  <tr><td>时间</td><td>文本框</td><td>当前时间</td><td>格式 HH:mm:ss，可手动修改</td></tr>
+  <tr><td>序列号</td><td>文本框</td><td>000001</td><td>用于条形码与二维码内容</td></tr>
+  <tr><td>产品编号</td><td>文本框</td><td>PN-001</td><td>用于文本标签与二维码内容</td></tr>
+  <tr><td>二维码内容</td><td>文本框</td><td>{serial}</td><td>支持变量占位符（见 FR-09）</td></tr>
+</table>
+<p>任意字段变化时，预览画布须<strong>实时</strong>刷新。</p>
+
+<!-- FR-02 -->
+<h3><span class="badge">FR-02</span>标签元素定义</h3>
+<p>标签固定包含以下 5 个元素（不可动态增删）：</p>
+<table>
+  <tr><th>元素名</th><th>类型</th><th>初始位置 (X, Y) mm</th><th>初始尺寸 W × H mm</th></tr>
+  <tr><td>日期时间</td><td>文本</td><td>(1, 2)</td><td>28 × 5</td></tr>
+  <tr><td>产品编号</td><td>文本</td><td>(1, 9)</td><td>28 × 5</td></tr>
+  <tr><td>序列号</td><td>文本</td><td>(1, 16)</td><td>28 × 5</td></tr>
+  <tr><td>条形码</td><td>Code 128</td><td>(1, 23)</td><td>28 × 14</td></tr>
+  <tr><td>二维码</td><td>QR Code</td><td>(4, 42)</td><td>22 × 22</td></tr>
+</table>
+
+<!-- FR-03 -->
+<h3><span class="badge">FR-03</span>可视化预览画布</h3>
+<ul>
+  <li>画布比例：<strong>4 px = 1 mm</strong>，画布像素尺寸 120 × 400 px，对应实际 30 × 100 mm</li>
+  <li>每个元素以蓝色边框方块呈现，光标悬停显示元素名称提示</li>
+  <li>文本元素实时显示当前录入内容</li>
+  <li>条形码元素显示仿真条纹图案（预览用，非实际编码）</li>
+  <li>二维码元素显示占位框（含 "QR" 文字）</li>
+</ul>
+
+<!-- FR-04 -->
+<h3><span class="badge">FR-04</span>元素拖动定位</h3>
+<ul>
+  <li>用户可在画布上按住左键拖动任意元素，实时更新其位置</li>
+  <li>坐标约束：X ∈ [0, 30−W] mm，Y ∈ [0, 100−H] mm，不可拖出标签范围</li>
+  <li>坐标精度：0.1 mm</li>
+  <li>拖动过程中，左侧面板 X / Y 输入框<strong>同步更新</strong></li>
+  <li>松开鼠标后立即触发布局保存</li>
+</ul>
+
+<!-- FR-05 -->
+<h3><span class="badge">FR-05</span>元素缩放</h3>
+<ul>
+  <li>每个元素<strong>右下角</strong>显示蓝色拖拽手柄（8 × 8 px，鼠标变为双向箭头）</li>
+  <li>拖动手柄可自由调整元素的宽度（W）与高度（H）</li>
+  <li>尺寸约束：W ≥ 2 mm，H ≥ 2 mm，且不超出标签右边界/下边界</li>
+  <li>拖动过程中，左侧面板 W / H 输入框<strong>同步更新</strong></li>
+  <li>缩放手柄的 MouseDown 事件阻止冒泡，避免触发拖动逻辑</li>
+</ul>
+
+<!-- FR-06 -->
+<h3><span class="badge">FR-06</span>精确位置输入面板</h3>
+<ul>
+  <li>左侧面板为每个元素提供 X / Y / W / H 四个数字输入框（单位：mm）</li>
+  <li>修改任意数值后，画布中对应元素<strong>立即</strong>更新</li>
+  <li>双向联动：画布操作 → 输入框刷新；输入框修改 → 画布刷新</li>
+  <li>内部设置 <code>_busy</code> 标志位，防止双向联动导致的循环更新</li>
+  <li>数值变化后防抖 <strong>800 ms</strong> 自动保存布局</li>
+</ul>
+
+<!-- FR-07 -->
+<h3><span class="badge">FR-07</span>布局持久化</h3>
+<ul>
+  <li>布局保存到程序目录下的 <code>layout.cfg</code>，文本格式，每行一个元素，字段以 <code>|</code> 分隔：<br>
+    <code>元素名|X|Y|W|H</code>（数值使用 InvariantCulture，保留 1 位小数）</li>
+  <li>触发保存时机：① 拖动结束；② 缩放结束；③ 输入框防抖 800 ms 后；④ 窗口关闭</li>
+  <li>程序启动时自动加载 <code>layout.cfg</code>，文件不存在则使用默认布局</li>
+</ul>
+
+<!-- FR-08 -->
+<h3><span class="badge">FR-08</span>打印机配置</h3>
+<ul>
+  <li>打印机名称从程序目录下的 <code>printer.cfg</code> 文本文件读取（去除首尾空白）</li>
+  <li>文件不存在时使用默认值：<code>TSC TTP-244 Plus</code></li>
+  <li>打印前校验打印机是否在系统已安装列表中</li>
+  <li>未找到打印机时弹出错误对话框，并列出当前所有已安装打印机名称，提示用户修改配置文件</li>
+</ul>
+
+<!-- FR-09 -->
+<h3><span class="badge">FR-09</span>标签打印</h3>
+<p><strong>打印参数（固定）：</strong></p>
+<table>
+  <tr><th>参数</th><th>值</th></tr>
+  <tr><td>标签尺寸</td><td>30 mm × 100 mm</td></tr>
+  <tr><td>间距（GAP）</td><td>2 mm</td></tr>
+  <tr><td>打印速度</td><td>4</td></tr>
+  <tr><td>打印浓度</td><td>12</td></tr>
+  <tr><td>打印方向</td><td>1（纵向）</td></tr>
+  <tr><td>字符编码</td><td>UTF-8</td></tr>
+  <tr><td>分辨率</td><td>203 DPI（8 dots/mm）</td></tr>
+  <tr><td>撕纸模式</td><td>开启（SET TEAR ON）</td></tr>
+</table>
+
+<p><strong>打印内容映射：</strong></p>
+<table>
+  <tr><th>元素</th><th>TSPL 指令</th><th>内容</th></tr>
+  <tr><td>日期时间</td><td><code>printerfont</code> 字体 1</td><td><code>yyyy-MM-dd HH:mm:ss</code></td></tr>
+  <tr><td>产品编号</td><td><code>printerfont</code> 字体 2</td><td><code>PN: {product}</code></td></tr>
+  <tr><td>序列号</td><td><code>printerfont</code> 字体 2</td><td><code>SN: {serial}</code></td></tr>
+  <tr><td>条形码</td><td><code>barcode</code> Code 128</td><td>序列号，高度 = H × 75%，含人眼识别行，窄条 2 / 宽条 2 dots</td></tr>
+  <tr><td>二维码</td><td><code>QRCODE</code> 指令</td><td>容错级别 M，模块大小 6，角度 0°，内容支持变量替换</td></tr>
+</table>
+
+<p><strong>二维码内容变量替换规则：</strong></p>
+<table>
+  <tr><th>占位符</th><th>替换为</th></tr>
+  <tr><td><code>{serial}</code></td><td>序列号输入框内容</td></tr>
+  <tr><td><code>{product}</code></td><td>产品编号输入框内容</td></tr>
+  <tr><td><code>{date}</code></td><td>所选日期（yyyy-MM-dd）</td></tr>
+  <tr><td><code>{time}</code></td><td>时间输入框内容</td></tr>
+</table>
+
+<div class="note">
+  打印成功后弹出"打印完成！"信息框；打印过程中发生异常则弹出错误消息，显示异常详情。
+</div>
+
+<hr class="section-divider">
+
+<!-- ======= 3 非功能需求 ======= -->
+<h2>3. 非功能需求</h2>
+<table>
+  <tr><th>编号</th><th>描述</th></tr>
+  <tr><td>NFR-01</td><td>依赖 <code>TSCLIB.dll</code>（TSC 官方驱动库），须与 exe 同目录部署</td></tr>
+  <tr><td>NFR-02</td><td>窗口固定尺寸 720 × 620 px，不可缩放（ResizeMode = CanMinimize）</td></tr>
+  <tr><td>NFR-03</td><td>界面语言：简体中文；字体：Microsoft YaHei</td></tr>
+  <tr><td>NFR-04</td><td>坐标系原点为标签<strong>左上角</strong>，X 向右，Y 向下</td></tr>
+  <tr><td>NFR-05</td><td>布局与打印机配置均以本地文本文件存储，无需数据库</td></tr>
+</table>
+
+<hr class="section-divider">
+
+<!-- ======= 4 待扩展点 ======= -->
+<h2>4. 待扩展功能（当前版本未实现）</h2>
+<table>
+  <tr><th>功能</th><th>备注</th></tr>
+  <tr><td>CSV 批量打印</td><td><code>lab_print.csv</code> 文件已存在，字段含 cab / text / copy，逻辑尚未接入 UI</td></tr>
+  <tr><td>序列号自动递增</td><td>每次打印后序列号 +1</td></tr>
+  <tr><td>自定义标签尺寸</td><td>目前硬编码为 30 × 100 mm</td></tr>
+  <tr><td>动态增删标签元素</td><td>当前元素集合固定为 5 个</td></tr>
+  <tr><td>多打印机切换</td><td>目前仅支持单台打印机，需 UI 配置入口</td></tr>
+</table>
+
+<hr class="section-divider">
+
+<!-- ======= 5 部署说明 ======= -->
+<h2>5. 部署依赖清单</h2>
+<table>
+  <tr><th>文件</th><th>用途</th></tr>
+  <tr><td><code>Miura_Labeling.exe</code></td><td>主程序</td></tr>
+  <tr><td><code>TSCLIB.dll</code></td><td>TSC 打印机驱动通信库</td></tr>
+  <tr><td><code>printer.cfg</code></td><td>打印机名称配置（文本文件，一行）</td></tr>
+  <tr><td><code>layout.cfg</code></td><td>元素布局缓存（程序自动生成与维护）</td></tr>
+</table>
+
+</body>
+</html>

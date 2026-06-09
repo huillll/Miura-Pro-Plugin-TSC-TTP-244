@@ -1,13 +1,99 @@
-﻿<Window x:Class="MainWindow"
+<Window x:Class="Miura_Labeling.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Miura_Labeling"
-        mc:Ignorable="d"
-        Title="MainWindow" Height="100" Width="200">
+        Title="TSC TTP-244 标签打印" Width="720" Height="620"
+        ResizeMode="CanMinimize" WindowStartupLocation="CenterScreen"
+        FontFamily="Microsoft YaHei" FontSize="12">
     <Grid>
-        <Label Content="PRINTIG..." FontSize="40" HorizontalAlignment="Center"/>
-    </Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="215"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
 
+        <!-- ===== 左侧面板 ===== -->
+        <DockPanel Grid.Column="0" Margin="8,8,4,8">
+
+            <Button DockPanel.Dock="Bottom" Content="打  印"
+                    Height="40" Margin="0,8,0,0" Click="OnPrint"
+                    FontSize="15" FontWeight="Bold"
+                    Background="#1976D2" Foreground="White" BorderThickness="0"/>
+
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel>
+
+                    <!-- 标签信息输入 -->
+                    <GroupBox Header="标签信息" Margin="0,0,0,8" Padding="6">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="60"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Row="0" Text="日期:" VerticalAlignment="Center"/>
+                            <DatePicker x:Name="DpDate" Grid.Row="0" Grid.Column="1"
+                                        VerticalAlignment="Center"
+                                        SelectedDateChanged="OnInputChanged"/>
+
+                            <TextBlock Grid.Row="1" Text="时间:" VerticalAlignment="Center"/>
+                            <TextBox x:Name="TbTime" Grid.Row="1" Grid.Column="1"
+                                     VerticalAlignment="Center" Padding="3,2"
+                                     TextChanged="OnInputChanged"/>
+
+                            <TextBlock Grid.Row="2" Text="序列号:" VerticalAlignment="Center"/>
+                            <TextBox x:Name="TbSerial" Grid.Row="2" Grid.Column="1"
+                                     VerticalAlignment="Center" Padding="3,2"
+                                     TextChanged="OnInputChanged"/>
+
+                            <TextBlock Grid.Row="3" Text="产品编号:" VerticalAlignment="Center"/>
+                            <TextBox x:Name="TbProduct" Grid.Row="3" Grid.Column="1"
+                                     VerticalAlignment="Center" Padding="3,2"
+                                     TextChanged="OnInputChanged"/>
+
+                            <StackPanel Grid.Row="4" Grid.ColumnSpan="2" Margin="0,4,0,2">
+                                <TextBlock Text="二维码内容 (支持 {serial} {product} {date} {time}):"
+                                           FontSize="10" Foreground="#555" Margin="0,0,0,2"/>
+                                <TextBox x:Name="TbQRContent" Padding="3,2"
+                                         TextChanged="OnInputChanged"/>
+                            </StackPanel>
+                        </Grid>
+                    </GroupBox>
+
+                    <!-- 元素位置 (动态生成) -->
+                    <GroupBox Header="元素位置 (mm)" Padding="4">
+                        <StackPanel x:Name="PosPanel"/>
+                    </GroupBox>
+
+                </StackPanel>
+            </ScrollViewer>
+        </DockPanel>
+
+        <!-- ===== 右侧预览 ===== -->
+        <Grid Grid.Column="1" Background="#ECEFF1">
+            <TextBlock Text="拖动元素可调整位置"
+                       HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                       Margin="0,0,0,6" Foreground="#888" FontSize="11"/>
+            <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                          VerticalScrollBarVisibility="Auto"
+                          Margin="0,0,0,24">
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Top"
+                            Margin="20,14,20,10">
+                    <TextBlock Text="30 × 100 mm  (比例 4×)" HorizontalAlignment="Center"
+                               Foreground="#999" FontSize="10" Margin="0,0,0,3"/>
+                    <Border BorderBrush="#666" BorderThickness="1">
+                        <Canvas x:Name="LabelCanvas" Width="120" Height="400"
+                                Background="White" ClipToBounds="True"
+                                MouseMove="Canvas_MouseMove"
+                                MouseUp="Canvas_MouseUp"/>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+    </Grid>
 </Window>
